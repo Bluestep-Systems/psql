@@ -1,0 +1,13 @@
+services:
+  psql:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PSQL_VERSION=${PSQL_VERSION}
+      tags:
+      - psql:latest
+      - psql:${PSQL_VERSION}
+      - ghcr.io/bluestep-systems/psql:latest
+      - ghcr.io/bluestep-systems/psql:${PSQL_VERSION}
+    image: psql
