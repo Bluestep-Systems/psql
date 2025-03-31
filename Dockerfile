@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-LABEL org.opencontainers.image.source=https://github.com/Bluestep-Systems/bluestep-git
+LABEL org.opencontainers.image.source=https://github.com/Bluestep-Systems/psql
 LABEL org.opencontainers.image.description="psql"
 ARG PSQL_VERSION=14
 RUN apt-get -y update && \
