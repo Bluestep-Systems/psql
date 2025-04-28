@@ -1,0 +1,53 @@
+name: Build and Push Docker psql and kubectl Image CI
+
+on: 
+  workflow_dispatch:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      TAG: ${{ github.event.release.tag_name || 'latest' }}
+      PSQL_VERSION: ERROR
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: load PSQL_VERSION into GITHUB_ENV
+        run: cat .env >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Use these credientials because we're pushing the tag below to the GitHub Container Registry
+      - name: Log in to GitHub Container Registry using our credentials
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 #hash for v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Build and push psql with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          build-args: |
+            PSQL_VERSION=${{ env.PSQL_VERSION  }}
+          tags: |
+            ghcr.io/bluestep-systems/psql
+            ghcr.io/bluestep-systems/psql:${{ env.TAG }}
+            ghcr.io/bluestep-systems/psql:${{ env.PSQL_VERSION }}
+          cache-from: type=gha
+          cache-to: type=gha  
